@@ -12,7 +12,7 @@ export class Post {
   imageUrl?: string;
 
   @Prop({ required: true })
-  authorId: string; // user _id
+  authorId: string; 
 
   @Prop({ default: 0 })
   likes: number;

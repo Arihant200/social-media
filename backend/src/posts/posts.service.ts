@@ -8,12 +8,12 @@ import { CreatePostDto } from './dto/create-post.dto';
 export class PostsService {
   constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>) {}
 
-  async create(createPostDto: CreatePostDto, authorId: string): Promise<Post> {
-    const created = new this.postModel({ ...createPostDto, authorId });
+  async create(createPostDto: CreatePostDto, authorId: string, imageUrl?: string): Promise<Post> {
+    const created = new this.postModel({ ...createPostDto, authorId ,imageUrl});
     return created.save();
   }
 
   async findAll(): Promise<Post[]> {
-    return this.postModel.find().sort({ createdAt: -1 }); // newest first
+    return this.postModel.find().sort({ createdAt: -1 });
   }
 }
