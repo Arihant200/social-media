@@ -14,8 +14,8 @@ export class Post {
   @Prop({ required: true })
   authorId: string; 
 
-  @Prop({ default: 0 })
-  likes: number;
+  @Prop({ type: [String], default: [] })  
+  likedBy: string[];  
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

@@ -7,6 +7,8 @@ import {
   Request,
   UploadedFile,
   UseInterceptors,
+  Param,
+  NotFoundException
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
@@ -41,5 +43,26 @@ export class PostsController {
   @Get()
   async findAll() {
     return this.postsService.findAll();
+  }
+
+  @Get(':id')
+async findOne(@Param('id') id: string) {
+ const post = await this.postsService.findOne(id);
+    if (!post) {
+      throw new NotFoundException(`Post with ID "${id}" not found`);
+    }
+    return post;
+}
+
+ @UseGuards(AuthGuard('jwt'))
+  @HttpPost(':id/like')
+  async like(@Param('id') postId: string, @Request() req) {
+    return this.postsService.like(postId, req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @HttpPost(':id/unlike')
+  async unlike(@Param('id') postId: string, @Request() req) {
+    return this.postsService.unlike(postId, req.user.userId);
   }
 }
