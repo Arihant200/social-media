@@ -7,6 +7,12 @@ import { AuthGuard } from '@nestjs/passport';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Get() 
+  async findAllUsers() {
+    return await this.usersService.findAll();
+  }
+  
+
   @Get(':id')
   async getProfile(@Param('id') id: string) {
     return this.usersService.findById(id);

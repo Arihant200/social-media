@@ -8,13 +8,17 @@ import {
   UploadedFile,
   UseInterceptors,
   Param,
-  NotFoundException
+  NotFoundException,
+  BadRequestException
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import cloudinary from '../cloudinary/cloudinary.provider';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import * as fs from 'fs/promises'; 
 
 @Controller('posts')
 export class PostsController {
@@ -22,22 +26,54 @@ export class PostsController {
 
   @UseGuards(AuthGuard('jwt'))
   @HttpPost()
-  @UseInterceptors(FileInterceptor('image')) 
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, callback) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+          const ext = extname(file.originalname);
+          const filename = `${file.fieldname}-${uniqueSuffix}${ext}`;
+          callback(null, filename);
+        },
+      }),
+
+    }),
+  )
   async create(
     @Body() createPostDto: CreatePostDto,
     @Request() req,
     @UploadedFile() file: Express.Multer.File,
   ) {
     let imageUrl: string | undefined;
+    let tempFilePath: string | undefined; 
 
-    if (file) {
-      const upload = await cloudinary.uploader.upload(file.path, {
-        folder: 'posts',
-      });
-      imageUrl = upload.secure_url;
-    }
+    try { 
+      if (!file || !file.path) {
+        console.error('File or file path is missing after Multer processing.');
+        throw new BadRequestException('Image file is required or failed to process.');
+      }
 
-    return this.postsService.create(createPostDto, req.user.userId, imageUrl);
+      tempFilePath = file.path; 
+
+      if (file) {
+        const upload = await cloudinary.uploader.upload(file.path, {
+          folder: 'posts',
+        });
+        imageUrl = upload.secure_url;
+      }
+
+      return this.postsService.create(createPostDto, req.user.userId, imageUrl);
+    } finally { 
+      if (tempFilePath) {
+        try {
+          await fs.unlink(tempFilePath); 
+          console.log(`Temporary file deleted: ${tempFilePath}`);
+        } catch (unlinkError) {
+          console.error(`Error deleting temporary file ${tempFilePath}:`, unlinkError);
+        }
+      }
+    } 
   }
 
   @Get()
@@ -46,15 +82,15 @@ export class PostsController {
   }
 
   @Get(':id')
-async findOne(@Param('id') id: string) {
- const post = await this.postsService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const post = await this.postsService.findOne(id);
     if (!post) {
       throw new NotFoundException(`Post with ID "${id}" not found`);
     }
     return post;
-}
+  }
 
- @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   @HttpPost(':id/like')
   async like(@Param('id') postId: string, @Request() req) {
     return this.postsService.like(postId, req.user.userId);

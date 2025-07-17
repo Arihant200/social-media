@@ -8,7 +8,7 @@ import { User, UserSchema } from './schemas/user.schema';
     // This line registers the UserSchema and makes the UserModel available for injection
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])
   ],
-  exports: [MongooseModule],
+  exports: [MongooseModule,UsersService],
 
   providers: [UsersService],
   controllers: [UsersController]

@@ -9,6 +9,11 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<UserDocument>
   ) {}
 
+async findAll(): Promise<UserDocument[]> {
+   
+    return this.userModel.find().select('-password').exec();
+  }
+
   async findById(id: string): Promise<User> {
     const user = await this.userModel.findById(id).select('-password'); // don't return password
     if (!user) throw new NotFoundException('User not found');
