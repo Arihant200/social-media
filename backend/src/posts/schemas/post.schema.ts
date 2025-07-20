@@ -11,8 +11,8 @@ export class Post {
   @Prop()
   imageUrl?: string;
 
-  @Prop({ required: true })
-  authorId: string; 
+  @Prop({ type: String, ref: 'User', required: true })
+authorId: string;
 
   @Prop({ type: [String], default: [] })  
   likedBy: string[];  

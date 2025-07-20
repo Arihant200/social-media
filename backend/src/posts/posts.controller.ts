@@ -9,7 +9,9 @@ import {
   UseInterceptors,
   Param,
   NotFoundException,
-  BadRequestException
+  BadRequestException,
+  Query,
+
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
@@ -89,6 +91,20 @@ export class PostsController {
     }
     return post;
   }
+
+  @Get()
+  async find(@Query('authorId') authorId?: string) {
+    if (authorId) {
+      return this.postsService.findByAuthor(authorId);
+    }
+    return this.postsService.findAll();
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+@HttpPost(':id/like')
+async toggleLike(@Param('id') postId: string, @Request() req) {
+  return this.postsService.toggleLike(postId, req.user.userId);
+}
 
   @UseGuards(AuthGuard('jwt'))
   @HttpPost(':id/like')

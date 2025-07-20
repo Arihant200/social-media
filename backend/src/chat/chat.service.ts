@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable ,BadRequestException} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Message, MessageDocument } from './schemas/message.schema';
@@ -9,10 +9,22 @@ export class ChatService {
     @InjectModel(Message.name) private messageModel: Model<MessageDocument>,
   ) {}
 
-  async sendMessage(senderId: string, receiverId: string, content: string): Promise<Message> {
-    const message = new this.messageModel({ senderId, receiverId, content });
-    return message.save();
+ // ChatService
+async sendMessage(senderId: string, receiverId: string, messageText: string) { // Renamed parameter for clarity
+  if (!senderId || !receiverId || !messageText) {
+    throw new BadRequestException('Missing fields');
   }
+
+  const chat = new this.messageModel({
+    senderId,
+    receiverId,
+    content: messageText, // <--- Pass it as 'content'
+    createdAt: new Date(),
+  });
+
+  return await chat.save();
+}
+
 
   async getMessagesBetweenUsers(userId1: string, userId2: string): Promise<Message[]> {
     return this.messageModel.find({
@@ -22,4 +34,5 @@ export class ChatService {
       ],
     }).sort({ createdAt: 1 }); // sort oldest → newest
   }
+  
 }

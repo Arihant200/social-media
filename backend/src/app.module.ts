@@ -5,7 +5,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
-import { FeedModule } from './feed/feed.module';
 import { ChatModule } from './chat/chat.module';
 import { CommentsModule } from './comments/comments.module';
 
@@ -21,7 +20,6 @@ import { CommentsModule } from './comments/comments.module';
     UsersModule,
     AuthModule,
     PostsModule,
-    FeedModule,
     ChatModule,
     CommentsModule,
     

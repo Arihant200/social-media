@@ -20,6 +20,12 @@ async findAll(): Promise<UserDocument[]> {
     return user;
   }
 
+   async findByName(name: string): Promise<User[]> {
+    return this.userModel.find({
+      username: { $regex: name, $options: 'i' }, 
+    }).select('username _id');
+  }
+
   async updateProfile(id: string, update: Partial<User>): Promise<User> {
     const user = await this.userModel.findByIdAndUpdate(id, update, { new: true }).select('-password');
     if (!user) throw new NotFoundException('User not found');

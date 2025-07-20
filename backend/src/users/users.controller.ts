@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, Body, UseGuards, Request,ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Patch, Param, Body, UseGuards, Request,ForbiddenException,Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -11,7 +11,10 @@ export class UsersController {
   async findAllUsers() {
     return await this.usersService.findAll();
   }
-  
+  @Get('search')
+  async searchUsers(@Query('name') name: string) {
+    return this.usersService.findByName(name);
+  }
 
   @Get(':id')
   async getProfile(@Param('id') id: string) {

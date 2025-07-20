@@ -9,15 +9,14 @@ import { AuthGuard } from '@nestjs/passport';
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
-  @Post(':receiverId')
-  async sendMessage(
-    @Param('receiverId') receiverId: string,
-    @Body('content') content: string,
-    @Request() req
-  ) {
-    return this.chatService.sendMessage(req.user.userId, receiverId, content);
-  }
+ // chat.controller.ts
+@Post('send')
+async sendMessage(@Body() body: { senderId: string; receiverId: string; message: string }) {
+    console.log('Received message body:', body);
+  return this.chatService.sendMessage(body.senderId, body.receiverId, body.message);
+}
 
+  
   @Get(':userId')
   async getMessages(@Param('userId') userId: string, @Request() req) {
     return this.chatService.getMessagesBetweenUsers(req.user.userId, userId);
